@@ -1,0 +1,43 @@
+{
+  "name": "mini-flux",
+  "description": "",
+  "homepage": "https://github.com/kevbook/mini-flux",
+  "keywords": [
+    "flux"
+  ],
+  "author": "Karan Sakhuja <kevin.sakhuja@gmail.com> (http://kevify.com)",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevbook/mini-flux.git"
+  },
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/kevbook/mini-flux/issues"
+  },
+  "dependencies": {
+    "kevbook.flow": "latest",
+    "tiny-emitter": "^1.0.0"
+  },
+  "devDependencies": {
+    "babel-core": "latest",
+    "babel-loader": "latest",
+    "error-parser": "latest",
+    "gulp": "latest",
+    "gulp-autopolyfiller": "latest",
+    "gulp-jsvalidate": "^2.0.0",
+    "gulp-uglify": "latest",
+    "gulp-webserver": "^0.9.0",
+    "merge": "latest",
+    "strip-loader": "latest",
+    "webpack": "latest",
+    "yargs": "latest"
+  },
+  "version": "1.0.1",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
