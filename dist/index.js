@@ -287,12 +287,11 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = miniFlux;
 
-	function miniFlux() {};
-
-	miniFlux.store = __webpack_require__(4);
-	miniFlux.actions = __webpack_require__(3);
+	module.exports = {
+	  store: __webpack_require__(4),
+	  actions: __webpack_require__(3)
+	};
 
 
 /***/ },

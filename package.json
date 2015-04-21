@@ -16,7 +16,6 @@
     "url": "https://github.com/kevbook/mini-flux/issues"
   },
   "dependencies": {
-    "kevbook.flow": "latest",
     "eventemitter3": "^0.1.2"
   },
   "devDependencies": {

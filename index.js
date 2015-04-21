@@ -1,7 +1,5 @@
 
-module.exports = miniFlux;
-
-function miniFlux() {};
-
-miniFlux.store = require('./lib/store');
-miniFlux.actions = require('./lib/actions');
+module.exports = {
+  store: require('./lib/store'),
+  actions: require('./lib/actions')
+};
