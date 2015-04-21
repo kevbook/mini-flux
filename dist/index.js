@@ -287,7 +287,6 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	
-
 	module.exports = {
 	  store: __webpack_require__(4),
 	  actions: __webpack_require__(3)
@@ -323,6 +322,7 @@
 
 
 	Actions.prototype._done = function(action) {
+
 	  var that = this;
 
 	  return {
@@ -364,7 +364,9 @@
 	};
 
 	Store.prototype.get = function(key) {
-	  return this.defaults[key]
+	  return (typeof key === 'undefined')
+	    ? this.defaults
+	    : this.defaults[key];
 	};
 
 	Store.prototype.set = function(key, val) {
@@ -372,6 +374,7 @@
 	};
 
 	Store.prototype._done = function(action) {
+
 	  var that = this;
 
 	  return {
