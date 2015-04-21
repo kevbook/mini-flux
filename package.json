@@ -1,6 +1,6 @@
 {
   "name": "mini-flux",
-  "description": "",
+  "description": "Minimal, simplest reactive flux architecture implementation",
   "homepage": "https://github.com/kevbook/mini-flux",
   "keywords": [
     "flux"
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "kevbook.flow": "latest",
-    "tiny-emitter": "^1.0.0"
+    "eventemitter3": "^0.1.2"
   },
   "devDependencies": {
     "babel-core": "latest",

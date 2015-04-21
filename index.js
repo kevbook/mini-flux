@@ -1,27 +1,7 @@
 
-var utils = require('./lib/utils'),
-  Emitter = require('tiny-emitter');
-
-
 module.exports = miniFlux;
 
-function miniFlux(opts) {
+function miniFlux() {};
 
-  if (typeof opts === 'undefined')
-    throw new Error('opts must be passed.');
-
-  // Init things
-  this.opts = opts || {};
-  this.events = events;
-  var that = this;
-};
-
-
-miniFlux.prototype.store = function(opts) {
-
-};
-
-
-miniFlux.prototype.actions = function(opts) {
-
-};
+miniFlux.store = require('./lib/store');
+miniFlux.actions = require('./lib/actions');
