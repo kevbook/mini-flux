@@ -16,7 +16,8 @@
     "url": "https://github.com/kevbook/mini-flux/issues"
   },
   "dependencies": {
-    "eventemitter3": "^0.1.2"
+    "eventemitter3": "^0.1.2",
+    "object-assign": "^2.0.0"
   },
   "devDependencies": {
     "babel-core": "latest",

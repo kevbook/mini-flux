@@ -340,18 +340,21 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	var Emitter = __webpack_require__(1);
+	var Emitter = __webpack_require__(1),
+	  objectAssign = __webpack_require__(5);
+
 
 	module.exports = Store;
-
 
 	function Store(opts) {
 
 	  // Defaults
 	  this.defaults = ( opts.defaults && opts.defaults() ) || {};
+	  this.data = objectAssign({}, this.defaults);
 
 	  this.stores = {};
 	  this.events = new Emitter();
+	  this.events.reset = this.reset;
 
 	  for (var key in opts) {
 	    if (key !== 'init')
@@ -365,12 +368,16 @@
 
 	Store.prototype.get = function(key) {
 	  return (typeof key === 'undefined')
-	    ? this.defaults
-	    : this.defaults[key];
+	    ? this.data
+	    : this.data[key];
 	};
 
 	Store.prototype.set = function(key, val) {
-	  return this.defaults[key] = val;
+	  return this.data[key] = val;
+	};
+
+	Store.prototype.reset = function() {
+	  return this.data = objectAssign({}, this.defaults);
 	};
 
 	Store.prototype._done = function(action) {
@@ -380,12 +387,45 @@
 	  return {
 	    get: this.get,
 	    set: this.set,
+	    reset: this.reset,
 	    done: function() {
 	      var args = Array.prototype.slice.call(arguments);
 	      args.unshift(action);
 	      that.events.emit.apply(that.events, args);
 	    }
 	  };
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
 	};
 
 

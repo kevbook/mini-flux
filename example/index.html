@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <title>miniFlux ToDo Example</title>
+    <script src=".js"></script>
+  </head>
+  <body>
+
+    <center> <h1>miniFlux ToDo Example.</h1> </center>
+    <section id="todoapp">
+
+      <div>
+        <header id="header">
+          <h1>todos</h1>
+          <input id="new-todo" placeholder="What needs to be done?"/>
+
+          <section id="main">
+            <input id="toggle-all" type="checkbox"/>
+
+            <ul id="todo-list">
+              <li>
+                <div class="view">
+                  <input type="checkbox" class="toggle"/>
+                  <label>Rule the web</label>
+                  <button class="destroy"></button>
+                </div>
+                <input class="edit"/>
+              </li>
+
+            </ul>
+          </section>
+
+          <footer id="footer"><span id="todo-count"><strong>1</strong><span>item left</span></span>
+            <ul id="filters">
+              <li><a href="#" class="selected">All</a></li>
+              <li><a href="#">Active</a></li>
+              <li><a href="#">Completed</a></li>
+            </ul>
+            <button id="clear-completed" class="hidden2">Clear completed (0)</button>
+          </footer>
+        </header>
+
+      </div>
+
+    </section>
+
+  </body>
+</html>
