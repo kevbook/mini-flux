@@ -15,3 +15,13 @@ __Components are:__
 
 
 __Note: mini-flux__ is more Functional Reactive Programming (FRP) than traditional flux architecture. There is no dispatcher, components are listenable;
+
+
+```
+╔═════════╗       ╔════════╗       ╔═════════════════╗
+║ Actions ║──────>║ Stores ║──────>║ View Components ║
+╚═════════╝       ╚════════╝       ╚═════════════════╝
+                   listener             listener
+     ^                                      │
+     └──────────────────────────────────────┘
+```
