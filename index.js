@@ -1,5 +1,5 @@
 
 module.exports = {
-  store: require('./lib/store'),
-  actions: require('./lib/actions')
+  createStore: require('./lib/store'),
+  createAction: require('./lib/action')
 };

@@ -5,7 +5,7 @@ console.log('Running tests.js');
 var miniFlux = require('..');
 
 
-var a = new miniFlux.actions({
+var a = new miniFlux.createAction({
 
   init: function() {
     console.log('Hello');
@@ -21,7 +21,7 @@ var a = new miniFlux.actions({
 });
 
 
-var s = new miniFlux.store({
+var s = new miniFlux.createStore({
 
   init: function() {
     console.log('World');

@@ -288,8 +288,8 @@
 
 	
 	module.exports = {
-	  store: __webpack_require__(4),
-	  actions: __webpack_require__(3)
+	  createStore: __webpack_require__(4),
+	  createAction: __webpack_require__(3)
 	};
 
 
@@ -300,12 +300,12 @@
 	
 	var Emitter = __webpack_require__(1);
 
-	module.exports = Actions;
+	module.exports = Action;
 
 
-	function Actions(opts) {
+	function Action(opts) {
 
-	  this.actions = {};
+	  this.action = {};
 	  this.emitter = new Emitter();
 
 	  for (var key in opts) {
@@ -313,25 +313,25 @@
 	        key !== 'once' && key !== 'emit' && key !== 'off' &&
 	        key !== 'removeListener' && key !== 'removeAllListeners') {
 
-	      this.actions[key] = opts[key].bind(this._done(key));
+	      this.action[key] = opts[key].bind(this._done(key));
 	    }
 	  }
 
 	  // Run init
-	  opts.init && opts.init.call(this.actions);
+	  opts.init && opts.init.call(this.action);
 
 	  // @ public api
-	  this.actions.on = this.emitter.on;
-	  this.actions.once = this.emitter.once;
-	  this.actions.off = this.emitter.off;
-	  this.actions.removeListener = this.emitter.removeListener;
-	  this.actions.removeAllListeners = this.emitter.removeAllListeners;
+	  this.action.on = this.emitter.on;
+	  this.action.once = this.emitter.once;
+	  this.action.off = this.emitter.off;
+	  this.action.removeListener = this.emitter.removeListener;
+	  this.action.removeAllListeners = this.emitter.removeAllListeners;
 
-	  return this.actions;
+	  return this.action;
 	};
 
 
-	Actions.prototype = {
+	Action.prototype = {
 
 	  _done: function(action) {
 	    var that = this;
@@ -340,7 +340,7 @@
 	      done: function() {
 	        var args = Array.prototype.slice.call(arguments);
 	        args.unshift(action);
-	        that.emitter.emit.apply(that.actions, args);
+	        that.emitter.emit.apply(that.action, args);
 	      }
 	    };
 	  }
