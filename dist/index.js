@@ -331,17 +331,20 @@
 	};
 
 
-	Actions.prototype._done = function(action) {
+	Actions.prototype = {
 
-	  var that = this;
+	  _done: function(action) {
+	    var that = this;
 
-	  return {
-	    done: function() {
-	      var args = Array.prototype.slice.call(arguments);
-	      args.unshift(action);
-	      that.emitter.emit.apply(that.actions, args);
-	    }
-	  };
+	    return {
+	      done: function() {
+	        var args = Array.prototype.slice.call(arguments);
+	        args.unshift(action);
+	        that.emitter.emit.apply(that.actions, args);
+	      }
+	    };
+	  }
+
 	};
 
 
@@ -376,35 +379,40 @@
 	  return this.events;
 	};
 
-	Store.prototype.get = function(key) {
-	  return (typeof key === 'undefined')
-	    ? this.data
-	    : this.data[key];
-	};
 
-	Store.prototype.set = function(key, val) {
-	  return this.data[key] = val;
-	};
+	Store.prototype = {
 
-	Store.prototype.reset = function() {
+	  get: function(key) {
+	    return (typeof key === 'undefined')
+	      ? this.data
+	      : this.data[key];
+	  },
+
+	  set: function(key, val) {
+	    return this.data[key] = val;
+	  },
+
+	  reset: function() {
 	  return this.data = objectAssign({}, this.defaults);
+	  },
+
+	  _done: function(action) {
+	    var that = this;
+
+	    return {
+	      get: this.get,
+	      set: this.set,
+	      reset: this.reset,
+	      done: function() {
+	        var args = Array.prototype.slice.call(arguments);
+	        args.unshift(action);
+	        that.events.emit.apply(that.events, args);
+	      }
+	    };
+	  }
+
 	};
 
-	Store.prototype._done = function(action) {
-
-	  var that = this;
-
-	  return {
-	    get: this.get,
-	    set: this.set,
-	    reset: this.reset,
-	    done: function() {
-	      var args = Array.prototype.slice.call(arguments);
-	      args.unshift(action);
-	      that.events.emit.apply(that.events, args);
-	    }
-	  };
-	};
 
 
 /***/ },
