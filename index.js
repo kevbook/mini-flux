@@ -1,5 +1,7 @@
 
+var create = require('./lib/action');
+
 module.exports = {
-  createStore: require('./lib/store'),
-  createAction: require('./lib/action')
+  createStore: create,
+  createAction: create
 };

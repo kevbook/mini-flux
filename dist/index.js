@@ -44,11 +44,77 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(2);
+	module.exports = __webpack_require__(1);
 
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var create = __webpack_require__(2);
+
+	module.exports = {
+	  createStore: create,
+	  createAction: create
+	};
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var Emitter = __webpack_require__(3);
+
+	module.exports = Action;
+
+
+	function Action(opts) {
+
+	  this.actions = new Emitter();
+	  opts = opts || {};
+
+	  for (var key in opts) {
+	    if (typeof opts[key] === 'function' &&
+	        typeof this.actions[key] === 'undefined' &&
+	        key !== 'init' && key !== 'all') {
+
+	      this.actions[key] = opts[key].bind(this._done(key));
+	    }
+	  }
+
+	  // Run init
+	  opts.init && opts.init.call(this.actions);
+
+	  // @ public api
+	  return this.actions;
+	};
+
+
+	Action.prototype = {
+
+	  _done: function(key) {
+
+	    var that = this;
+	    var fn = function() {
+
+	      var args = Array.prototype.slice.call(arguments);
+	      that.actions.emit.apply(that.actions, args);
+
+	      // Emit all events provided
+	      // args.unshift('all', key);
+	      // that.actions.emit.apply(that.actions, args);
+	    };
+
+	    return { done: fn, render: fn };
+	  }
+
+	};
+
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -280,181 +346,6 @@
 	// Expose the module.
 	//
 	module.exports = EventEmitter;
-
-
-/***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	module.exports = {
-	  createStore: __webpack_require__(4),
-	  createAction: __webpack_require__(3)
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	var Emitter = __webpack_require__(1);
-
-	module.exports = Action;
-
-
-	function Action(opts) {
-
-	  this.action = {};
-	  this.emitter = new Emitter();
-	  opts = opts || {};
-
-
-	  for (var key in opts) {
-	    if (typeof opts[key] === 'function' &&
-	        key !== 'init' && key !== 'all' &&
-	        key !== 'on' && key !== 'once' &&
-	        key !== 'emit' && key !== 'off' &&
-	        key !== 'removeListener' && key !== 'removeAllListeners') {
-
-	      this.action[key] = opts[key].bind(this._done());
-	    }
-	  }
-
-	  // Run init
-	  opts.init && opts.init.call(this.action);
-
-	  // @ public api
-	  this.action.on = this.emitter.on;
-	  this.action.once = this.emitter.once;
-	  this.action.off = this.emitter.off;
-	  this.action.removeListener = this.emitter.removeListener;
-	  this.action.removeAllListeners = this.emitter.removeAllListeners;
-	  this.action.displayName = opts.displayName;
-
-	  return this.action;
-	};
-
-
-	Action.prototype = {
-
-	  _done: function() {
-
-	    var that = this;
-
-	    return {
-	      done: function() {
-
-	        var args = Array.prototype.slice.call(arguments);
-	        that.emitter.emit.apply(that.action, args);
-
-	        // Emit all events provided
-	        args.unshift('all');
-	        that.emitter.emit.apply(that.action, args);
-	      }
-	    };
-	  }
-
-	};
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	var Emitter = __webpack_require__(1),
-	  objectAssign = __webpack_require__(5);
-
-
-	module.exports = Store;
-
-	function Store(opts) {
-
-	  // Defaults
-	  this.defaults = ( opts.defaults && opts.defaults() ) || {};
-	  this.data = objectAssign({}, this.defaults);
-
-	  this.stores = {};
-	  this.events = new Emitter();
-	  this.events.reset = this.reset;
-
-	  for (var key in opts) {
-	    if (key !== 'init')
-	      this.stores[key] = opts[key].bind(this._done(key));
-	  }
-
-	  // Run init
-	  opts.init && opts.init.call(this.stores);
-	  return this.events;
-	};
-
-
-	Store.prototype = {
-
-	  get: function(key) {
-	    return (typeof key === 'undefined')
-	      ? this.data
-	      : this.data[key];
-	  },
-
-	  set: function(key, val) {
-	    return this.data[key] = val;
-	  },
-
-	  reset: function() {
-	  return this.data = objectAssign({}, this.defaults);
-	  },
-
-	  _done: function(action) {
-	    var that = this;
-
-	    return {
-	      get: this.get,
-	      set: this.set,
-	      reset: this.reset,
-	      done: function() {
-	        var args = Array.prototype.slice.call(arguments);
-	        args.unshift(action);
-	        that.events.emit.apply(that.events, args);
-	      }
-	    };
-	  }
-
-	};
-
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	function ToObject(val) {
-		if (val == null) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-
-		return Object(val);
-	}
-
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var keys;
-		var to = ToObject(target);
-
-		for (var s = 1; s < arguments.length; s++) {
-			from = arguments[s];
-			keys = Object.keys(Object(from));
-
-			for (var i = 0; i < keys.length; i++) {
-				to[keys[i]] = from[keys[i]];
-			}
-		}
-
-		return to;
-	};
 
 
 /***/ }
