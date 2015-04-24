@@ -307,13 +307,17 @@
 
 	  this.action = {};
 	  this.emitter = new Emitter();
+	  opts = opts || {};
+
 
 	  for (var key in opts) {
-	    if (key !== 'init' && key !== 'on' &&
-	        key !== 'once' && key !== 'emit' && key !== 'off' &&
+	    if (typeof opts[key] === 'function' &&
+	        key !== 'init' && key !== 'all' &&
+	        key !== 'on' && key !== 'once' &&
+	        key !== 'emit' && key !== 'off' &&
 	        key !== 'removeListener' && key !== 'removeAllListeners') {
 
-	      this.action[key] = opts[key].bind(this._done(key));
+	      this.action[key] = opts[key].bind(this._done());
 	    }
 	  }
 
@@ -326,6 +330,7 @@
 	  this.action.off = this.emitter.off;
 	  this.action.removeListener = this.emitter.removeListener;
 	  this.action.removeAllListeners = this.emitter.removeAllListeners;
+	  this.action.displayName = opts.displayName;
 
 	  return this.action;
 	};
@@ -333,13 +338,18 @@
 
 	Action.prototype = {
 
-	  _done: function(action) {
+	  _done: function() {
+
 	    var that = this;
 
 	    return {
 	      done: function() {
+
 	        var args = Array.prototype.slice.call(arguments);
-	        args.unshift(action);
+	        that.emitter.emit.apply(that.action, args);
+
+	        // Emit all events provided
+	        args.unshift('all');
 	        that.emitter.emit.apply(that.action, args);
 	      }
 	    };

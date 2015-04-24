@@ -54,14 +54,12 @@
 	var a = new miniFlux.createAction({
 
 	  init: function() {
-	    console.log('Hello');
+	    console.log('Init a');
 	  },
 
 	  doX: function(data, data2) {
 	    console.log('---- do x ----');
-	    console.log(data, data2);
-
-	    return this.done({ man: 'super' });
+	    return this.done('doX', { man: 'super' });
 	  },
 
 	});
@@ -70,16 +68,18 @@
 	var s = new miniFlux.createStore({
 
 	  init: function() {
-	    console.log('World');
-	    console.log(this);
+	    console.log('Init s');
 
 	    // Stores should listen to compled actions
+	    a.on('all', function() {
+	      console.log('in a displayName');
+	    });
+
 	    a.on('doX', this.solveX);
 	  },
 
 	  solveX: function(d) {
-	    console.log('--solveX--',d);
-	    console.log(this)
+	    console.log('---- solve x ----');
 	  }
 
 	})
@@ -350,13 +350,17 @@
 
 	  this.action = {};
 	  this.emitter = new Emitter();
+	  opts = opts || {};
+
 
 	  for (var key in opts) {
-	    if (key !== 'init' && key !== 'on' &&
-	        key !== 'once' && key !== 'emit' && key !== 'off' &&
+	    if (typeof opts[key] === 'function' &&
+	        key !== 'init' && key !== 'all' &&
+	        key !== 'on' && key !== 'once' &&
+	        key !== 'emit' && key !== 'off' &&
 	        key !== 'removeListener' && key !== 'removeAllListeners') {
 
-	      this.action[key] = opts[key].bind(this._done(key));
+	      this.action[key] = opts[key].bind(this._done());
 	    }
 	  }
 
@@ -369,6 +373,7 @@
 	  this.action.off = this.emitter.off;
 	  this.action.removeListener = this.emitter.removeListener;
 	  this.action.removeAllListeners = this.emitter.removeAllListeners;
+	  this.action.displayName = opts.displayName;
 
 	  return this.action;
 	};
@@ -376,13 +381,18 @@
 
 	Action.prototype = {
 
-	  _done: function(action) {
+	  _done: function() {
+
 	    var that = this;
 
 	    return {
 	      done: function() {
+
 	        var args = Array.prototype.slice.call(arguments);
-	        args.unshift(action);
+	        that.emitter.emit.apply(that.action, args);
+
+	        // Emit all events provided
+	        args.unshift('all');
 	        that.emitter.emit.apply(that.action, args);
 	      }
 	    };

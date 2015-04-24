@@ -8,14 +8,12 @@ var miniFlux = require('..');
 var a = new miniFlux.createAction({
 
   init: function() {
-    console.log('Hello');
+    console.log('Init a');
   },
 
   doX: function(data, data2) {
     console.log('---- do x ----');
-    console.log(data, data2);
-
-    return this.done({ man: 'super' });
+    return this.done('doX', { man: 'super' });
   },
 
 });
@@ -24,16 +22,18 @@ var a = new miniFlux.createAction({
 var s = new miniFlux.createStore({
 
   init: function() {
-    console.log('World');
-    console.log(this);
+    console.log('Init s');
 
     // Stores should listen to compled actions
+    a.on('all', function() {
+      console.log('in a displayName');
+    });
+
     a.on('doX', this.solveX);
   },
 
   solveX: function(d) {
-    console.log('--solveX--',d);
-    console.log(this)
+    console.log('---- solve x ----');
   }
 
 })
