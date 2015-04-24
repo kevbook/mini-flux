@@ -1,5 +1,6 @@
 {
   "name": "mini-flux",
+  "version": "1.0.2",
   "description": "Minimal, simplest reactive flux architecture implementation",
   "homepage": "https://github.com/kevbook/mini-flux",
   "keywords": [
@@ -32,7 +33,6 @@
     "webpack": "latest",
     "yargs": "latest"
   },
-  "version": "1.0.1",
   "directories": {
     "test": "test"
   },
