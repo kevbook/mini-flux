@@ -1,5 +1,6 @@
 
 var PubSub = require('pubsub-js');
+PubSub.immediateExceptions = true;
 
 module.exports = {
 

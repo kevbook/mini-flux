@@ -53,6 +53,7 @@
 
 	
 	var PubSub = __webpack_require__(2);
+	PubSub.immediateExceptions = true;
 
 	module.exports = {
 
