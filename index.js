@@ -14,7 +14,11 @@ module.exports = {
       },
 
       on: function(topic, fn) {
-        var token = PubSub.subscribe('action:'.concat(key,'.',topic), fn);
+
+        // Ability to subscribe to parent or any child.
+        topic = topic === '*' ? '' ? ('.'+topic);
+
+        var token = PubSub.subscribe('action:'.concat(key,topic), fn);
         return {
           off: function() {
             PubSub.unsubscribe(token);
@@ -40,7 +44,11 @@ module.exports = {
       },
 
       on: function(topic, fn) {
-        var token = PubSub.subscribe('store:'.concat(key,'.',topic), fn);
+
+        // Ability to subscribe to parent or any child.
+        topic = topic === '*' ? '' ? ('.'+topic);
+
+        var token = PubSub.subscribe('store:'.concat(key,topic), fn);
         return {
           off: function() {
             PubSub.unsubscribe(token);
