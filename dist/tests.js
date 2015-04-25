@@ -50,62 +50,92 @@
 
 	var miniFlux = __webpack_require__(1);
 
+	// Create an instance a
+	var a = miniFlux.createAction('a');
 
-	var a = new miniFlux.createAction({
+	console.log(a);
 
-	  init: function() {
-	    console.log('Init a');
-	  },
+	// var a = miniFlux.createAction({
 
-	  doX: function(data, data2) {
-	    console.log('---- do x ----');
-	    return this.done('doX', { man: 'super' });
-	  },
+	//   init: function() {
+	//     console.log('Init a');
+	//   },
 
-	  doY: function(data, data2) {
-	    console.log('---- do y ----');
-	    return this.done('doY');
-	  }
+	//   doX: function(data, data2) {
+	//     console.log('---- do x ----');
+	//     return this.done('doX', { man: 'super' });
+	//   },
 
-	});
+	//   doY: function(data, data2) {
+	//     console.log('---- do y ----');
+	//     return this.done('doY');
+	//   }
 
-
-	var s = new miniFlux.createStore({
-
-	  init: function() {
-	    console.log('Init s');
-
-	    // If stores wants to listen to all completed actions
-	    // a.on('all', function(key) {
-	    //   console.log('---- in all: %s ----', key);
-	    // });
-
-	    a.on('doX', this.solveX);
-	  },
-
-	  solveX: function(d) {
-	    console.log('---- solve x ----');
-	    return this.done('solveX');
-	  },
-
-	  solveY: function(d) {
-	    console.log('---- solve y ----');
-	  }
-
-	});
-
-	// Listen to stores
-	s.on('solveX', function() {
-	  console.log('---- solve x render ----');
-	});
-
-	// Do couple of actions
-	a.doX('superman', 'batman');
-	a.doY('kevin');
+	// });
 
 
-	window.a = a;
-	window.s = s;
+
+
+
+
+
+
+
+	// var a = new miniFlux.createAction({
+
+	//   init: function() {
+	//     console.log('Init a');
+	//   },
+
+	//   doX: function(data, data2) {
+	//     console.log('---- do x ----');
+	//     return this.done('doX', { man: 'super' });
+	//   },
+
+	//   doY: function(data, data2) {
+	//     console.log('---- do y ----');
+	//     return this.done('doY');
+	//   }
+
+	// });
+
+
+	// var s = new miniFlux.createStore({
+
+	//   init: function() {
+	//     console.log('Init s');
+
+	//     // If stores wants to listen to all completed actions
+	//     // a.on('all', function(key) {
+	//     //   console.log('---- in all: %s ----', key);
+	//     // });
+
+	//     a.on('doX', this.solveX);
+	//   },
+
+	//   solveX: function(d) {
+	//     console.log('---- solve x ----');
+	//     return this.done('solveX');
+	//   },
+
+	//   solveY: function(d) {
+	//     console.log('---- solve y ----');
+	//   }
+
+	// });
+
+	// // Listen to stores
+	// s.on('solveX', function() {
+	//   console.log('---- solve x render ----');
+	// });
+
+	// // Do couple of actions
+	// a.doX('superman', 'batman');
+	// a.doY('kevin');
+
+
+	// window.a = a;
+	// window.s = s;
 
 
 /***/ },
@@ -113,11 +143,64 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	var create = __webpack_require__(2);
+	var PubSub = __webpack_require__(2);
 
 	module.exports = {
-	  createStore: create,
-	  createAction: create
+
+	  offAll: PubSub.clearAllSubscriptions,
+
+	  createAction: function(key) {
+
+	    return {
+	      done: function(topic, data) {
+	        return PubSub.publish('action:'.concat(key,'.',topic), data);
+	      },
+
+	      on: function(topic, fn) {
+	        var token = PubSub.subscribe('action:'.concat(key,'.',topic), fn);
+	        return {
+	          off: function() {
+	            PubSub.unsubscribe(token);
+	          }
+	        }
+	      },
+
+	      off: function(topic) {
+	        return PubSub.unsubscribe('action:'.concat(key,'.',topic));
+	      },
+
+	      offAll: function() {
+	        return PubSub.unsubscribe('action:'.concat(key));
+	      }
+	    };
+	  },
+
+	  createStore: function(key) {
+
+	    return {
+	      done: function(topic, data) {
+	        return PubSub.publish('store:'.concat(key,'.',topic), data);
+	      },
+
+	      on: function(topic, fn) {
+	        var token = PubSub.subscribe('store:'.concat(key,'.',topic), fn);
+	        return {
+	          off: function() {
+	            PubSub.unsubscribe(token);
+	          }
+	        }
+	      },
+
+	      off: function(topic) {
+	        return PubSub.unsubscribe('store:'.concat(key,'.',topic));
+	      },
+
+	      offAll: function() {
+	        return PubSub.unsubscribe('store:'.concat(key));
+	      }
+	    };
+	  }
+
 	};
 
 
@@ -125,288 +208,250 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-	var Emitter = __webpack_require__(3);
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
+	Copyright (c) 2010,2011,2012,2013,2014 Morgan Roderick http://roderick.dk
+	License: MIT - http://mrgnrdrck.mit-license.org
 
-	module.exports = Action;
+	https://github.com/mroderick/PubSubJS
+	*/
+	(function (root, factory){
+		'use strict';
 
+	    if (true){
+	        // AMD. Register as an anonymous module.
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
-	function Action(opts) {
+	    } else if (typeof exports === 'object'){
+	        // CommonJS
+	        factory(exports);
 
-	  this.actions = new Emitter();
-	  opts = opts || {};
-
-	  for (var key in opts) {
-	    if (typeof opts[key] === 'function' &&
-	        typeof this.actions[key] === 'undefined' &&
-	        key !== 'init' && key !== 'all') {
-
-	      this.actions[key] = opts[key].bind(this._done(key));
+	    } else {
+	        // Browser globals
+	        var PubSub = {};
+	        root.PubSub = PubSub;
+	        factory(PubSub);
 	    }
-	  }
+	}(( typeof window === 'object' && window ) || this, function (PubSub){
+		'use strict';
 
-	  // Run init
-	  opts.init && opts.init.call(this.actions);
+		var messages = {},
+			lastUid = -1;
 
-	  // @ public api
-	  return this.actions;
-	};
+		function hasKeys(obj){
+			var key;
 
+			for (key in obj){
+				if ( obj.hasOwnProperty(key) ){
+					return true;
+				}
+			}
+			return false;
+		}
 
-	Action.prototype = {
+		/**
+		 *	Returns a function that throws the passed exception, for use as argument for setTimeout
+		 *	@param { Object } ex An Error object
+		 */
+		function throwException( ex ){
+			return function reThrowException(){
+				throw ex;
+			};
+		}
 
-	  _done: function(key) {
+		function callSubscriberWithDelayedExceptions( subscriber, message, data ){
+			try {
+				subscriber( message, data );
+			} catch( ex ){
+				setTimeout( throwException( ex ), 0);
+			}
+		}
 
-	    var that = this;
-	    var fn = function() {
+		function callSubscriberWithImmediateExceptions( subscriber, message, data ){
+			subscriber( message, data );
+		}
 
-	      var args = Array.prototype.slice.call(arguments);
-	      that.actions.emit.apply(that.actions, args);
+		function deliverMessage( originalMessage, matchedMessage, data, immediateExceptions ){
+			var subscribers = messages[matchedMessage],
+				callSubscriber = immediateExceptions ? callSubscriberWithImmediateExceptions : callSubscriberWithDelayedExceptions,
+				s;
 
-	      // Emit all events provided
-	      // args.unshift('all', key);
-	      // that.actions.emit.apply(that.actions, args);
-	    };
+			if ( !messages.hasOwnProperty( matchedMessage ) ) {
+				return;
+			}
 
-	    return { done: fn, render: fn };
-	  }
+			for (s in subscribers){
+				if ( subscribers.hasOwnProperty(s)){
+					callSubscriber( subscribers[s], originalMessage, data );
+				}
+			}
+		}
 
-	};
+		function createDeliveryFunction( message, data, immediateExceptions ){
+			return function deliverNamespaced(){
+				var topic = String( message ),
+					position = topic.lastIndexOf( '.' );
 
+				// deliver the message as it is now
+				deliverMessage(message, message, data, immediateExceptions);
 
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
+				// trim the hierarchy and deliver message to each level
+				while( position !== -1 ){
+					topic = topic.substr( 0, position );
+					position = topic.lastIndexOf('.');
+					deliverMessage( message, topic, data, immediateExceptions );
+				}
+			};
+		}
 
-	'use strict';
+		function messageHasSubscribers( message ){
+			var topic = String( message ),
+				found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic])),
+				position = topic.lastIndexOf( '.' );
 
-	/**
-	 * Representation of a single EventEmitter function.
-	 *
-	 * @param {Function} fn Event handler to be called.
-	 * @param {Mixed} context Context for function execution.
-	 * @param {Boolean} once Only emit once
-	 * @api private
-	 */
-	function EE(fn, context, once) {
-	  this.fn = fn;
-	  this.context = context;
-	  this.once = once || false;
-	}
+			while ( !found && position !== -1 ){
+				topic = topic.substr( 0, position );
+				position = topic.lastIndexOf( '.' );
+				found = Boolean(messages.hasOwnProperty( topic ) && hasKeys(messages[topic]));
+			}
 
-	/**
-	 * Minimal EventEmitter interface that is molded against the Node.js
-	 * EventEmitter interface.
-	 *
-	 * @constructor
-	 * @api public
-	 */
-	function EventEmitter() { /* Nothing to set */ }
+			return found;
+		}
 
-	/**
-	 * Holds the assigned EventEmitters by name.
-	 *
-	 * @type {Object}
-	 * @private
-	 */
-	EventEmitter.prototype._events = undefined;
+		function publish( message, data, sync, immediateExceptions ){
+			var deliver = createDeliveryFunction( message, data, immediateExceptions ),
+				hasSubscribers = messageHasSubscribers( message );
 
-	/**
-	 * Return a list of assigned event listeners.
-	 *
-	 * @param {String} event The events that should be listed.
-	 * @returns {Array}
-	 * @api public
-	 */
-	EventEmitter.prototype.listeners = function listeners(event) {
-	  if (!this._events || !this._events[event]) return [];
-	  if (this._events[event].fn) return [this._events[event].fn];
+			if ( !hasSubscribers ){
+				return false;
+			}
 
-	  for (var i = 0, l = this._events[event].length, ee = new Array(l); i < l; i++) {
-	    ee[i] = this._events[event][i].fn;
-	  }
+			if ( sync === true ){
+				deliver();
+			} else {
+				setTimeout( deliver, 0 );
+			}
+			return true;
+		}
 
-	  return ee;
-	};
+		/**
+		 *	PubSub.publish( message[, data] ) -> Boolean
+		 *	- message (String): The message to publish
+		 *	- data: The data to pass to subscribers
+		 *	Publishes the the message, passing the data to it's subscribers
+		**/
+		PubSub.publish = function( message, data ){
+			return publish( message, data, false, PubSub.immediateExceptions );
+		};
 
-	/**
-	 * Emit an event to all registered event listeners.
-	 *
-	 * @param {String} event The name of the event.
-	 * @returns {Boolean} Indication if we've emitted an event.
-	 * @api public
-	 */
-	EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-	  if (!this._events || !this._events[event]) return false;
+		/**
+		 *	PubSub.publishSync( message[, data] ) -> Boolean
+		 *	- message (String): The message to publish
+		 *	- data: The data to pass to subscribers
+		 *	Publishes the the message synchronously, passing the data to it's subscribers
+		**/
+		PubSub.publishSync = function( message, data ){
+			return publish( message, data, true, PubSub.immediateExceptions );
+		};
 
-	  var listeners = this._events[event]
-	    , len = arguments.length
-	    , args
-	    , i;
+		/**
+		 *	PubSub.subscribe( message, func ) -> String
+		 *	- message (String): The message to subscribe to
+		 *	- func (Function): The function to call when a new message is published
+		 *	Subscribes the passed function to the passed message. Every returned token is unique and should be stored if
+		 *	you need to unsubscribe
+		**/
+		PubSub.subscribe = function( message, func ){
+			if ( typeof func !== 'function'){
+				return false;
+			}
 
-	  if ('function' === typeof listeners.fn) {
-	    if (listeners.once) this.removeListener(event, listeners.fn, true);
+			// message is not registered yet
+			if ( !messages.hasOwnProperty( message ) ){
+				messages[message] = {};
+			}
 
-	    switch (len) {
-	      case 1: return listeners.fn.call(listeners.context), true;
-	      case 2: return listeners.fn.call(listeners.context, a1), true;
-	      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
-	      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
-	      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
-	      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
-	    }
+			// forcing token as String, to allow for future expansions without breaking usage
+			// and allow for easy use as key names for the 'messages' object
+			var token = 'uid_' + String(++lastUid);
+			messages[message][token] = func;
 
-	    for (i = 1, args = new Array(len -1); i < len; i++) {
-	      args[i - 1] = arguments[i];
-	    }
+			// return token for unsubscribing
+			return token;
+		};
 
-	    listeners.fn.apply(listeners.context, args);
-	  } else {
-	    var length = listeners.length
-	      , j;
+		/* Public: Clears all subscriptions
+		 */
+		PubSub.clearAllSubscriptions = function clearAllSubscriptions(){
+			messages = {};
+		};
 
-	    for (i = 0; i < length; i++) {
-	      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
+		/*Public: Clear subscriptions by the topic
+		*/
+		PubSub.clearSubscriptions = function clearSubscriptions(topic){
+			var m; 
+			for (m in messages){
+				if (messages.hasOwnProperty(m) && m.indexOf(topic) === 0){
+					delete messages[m];
+				}
+			}
+		};
 
-	      switch (len) {
-	        case 1: listeners[i].fn.call(listeners[i].context); break;
-	        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-	        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
-	        default:
-	          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-	            args[j - 1] = arguments[j];
-	          }
+		/* Public: removes subscriptions.
+		 * When passed a token, removes a specific subscription.
+		 * When passed a function, removes all subscriptions for that function
+		 * When passed a topic, removes all subscriptions for that topic (hierarchy)
+		 *
+		 * value - A token, function or topic to unsubscribe.
+		 *
+		 * Examples
+		 *
+		 *		// Example 1 - unsubscribing with a token
+		 *		var token = PubSub.subscribe('mytopic', myFunc);
+		 *		PubSub.unsubscribe(token);
+		 *
+		 *		// Example 2 - unsubscribing with a function
+		 *		PubSub.unsubscribe(myFunc);
+		 *
+		 *		// Example 3 - unsubscribing a topic
+		 *		PubSub.unsubscribe('mytopic');
+		 */
+		PubSub.unsubscribe = function(value){
+			var isTopic    = typeof value === 'string' && messages.hasOwnProperty(value),
+				isToken    = !isTopic && typeof value === 'string',
+				isFunction = typeof value === 'function',
+				result = false,
+				m, message, t;
 
-	          listeners[i].fn.apply(listeners[i].context, args);
-	      }
-	    }
-	  }
+			if (isTopic){
+				delete messages[value];
+				return;
+			}
 
-	  return true;
-	};
+			for ( m in messages ){
+				if ( messages.hasOwnProperty( m ) ){
+					message = messages[m];
 
-	/**
-	 * Register a new EventListener for the given event.
-	 *
-	 * @param {String} event Name of the event.
-	 * @param {Functon} fn Callback function.
-	 * @param {Mixed} context The context of the function.
-	 * @api public
-	 */
-	EventEmitter.prototype.on = function on(event, fn, context) {
-	  var listener = new EE(fn, context || this);
+					if ( isToken && message[value] ){
+						delete message[value];
+						result = value;
+						// tokens are unique, so we can just stop here
+						break;
+					}
 
-	  if (!this._events) this._events = {};
-	  if (!this._events[event]) this._events[event] = listener;
-	  else {
-	    if (!this._events[event].fn) this._events[event].push(listener);
-	    else this._events[event] = [
-	      this._events[event], listener
-	    ];
-	  }
+					if (isFunction) {
+						for ( t in message ){
+							if (message.hasOwnProperty(t) && message[t] === value){
+								delete message[t];
+								result = true;
+							}
+						}
+					}
+				}
+			}
 
-	  return this;
-	};
-
-	/**
-	 * Add an EventListener that's only called once.
-	 *
-	 * @param {String} event Name of the event.
-	 * @param {Function} fn Callback function.
-	 * @param {Mixed} context The context of the function.
-	 * @api public
-	 */
-	EventEmitter.prototype.once = function once(event, fn, context) {
-	  var listener = new EE(fn, context || this, true);
-
-	  if (!this._events) this._events = {};
-	  if (!this._events[event]) this._events[event] = listener;
-	  else {
-	    if (!this._events[event].fn) this._events[event].push(listener);
-	    else this._events[event] = [
-	      this._events[event], listener
-	    ];
-	  }
-
-	  return this;
-	};
-
-	/**
-	 * Remove event listeners.
-	 *
-	 * @param {String} event The event we want to remove.
-	 * @param {Function} fn The listener that we need to find.
-	 * @param {Boolean} once Only remove once listeners.
-	 * @api public
-	 */
-	EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
-	  if (!this._events || !this._events[event]) return this;
-
-	  var listeners = this._events[event]
-	    , events = [];
-
-	  if (fn) {
-	    if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
-	      events.push(listeners);
-	    }
-	    if (!listeners.fn) for (var i = 0, length = listeners.length; i < length; i++) {
-	      if (listeners[i].fn !== fn || (once && !listeners[i].once)) {
-	        events.push(listeners[i]);
-	      }
-	    }
-	  }
-
-	  //
-	  // Reset the array, or remove it completely if we have no more listeners.
-	  //
-	  if (events.length) {
-	    this._events[event] = events.length === 1 ? events[0] : events;
-	  } else {
-	    delete this._events[event];
-	  }
-
-	  return this;
-	};
-
-	/**
-	 * Remove all listeners or only the listeners for the specified event.
-	 *
-	 * @param {String} event The event want to remove all listeners for.
-	 * @api public
-	 */
-	EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-	  if (!this._events) return this;
-
-	  if (event) delete this._events[event];
-	  else this._events = {};
-
-	  return this;
-	};
-
-	//
-	// Alias methods names because people roll like that.
-	//
-	EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-	EventEmitter.prototype.addListener = EventEmitter.prototype.on;
-
-	//
-	// This function doesn't apply anymore.
-	//
-	EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
-	  return this;
-	};
-
-	//
-	// Expose the module.
-	//
-	EventEmitter.EventEmitter = EventEmitter;
-	EventEmitter.EventEmitter2 = EventEmitter;
-	EventEmitter.EventEmitter3 = EventEmitter;
-
-	//
-	// Expose the module.
-	//
-	module.exports = EventEmitter;
+			return result;
+		};
+	}));
 
 
 /***/ }
