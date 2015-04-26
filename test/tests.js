@@ -4,54 +4,37 @@ console.log('Running tests.js');
 
 var miniFlux = require('..');
 
+
+
 // Create an instance a
-var a = miniFlux.createAction('a');
+var a = miniFlux.createAction('a', {
+
+  init: function() {
+    console.log('Init a');
+  },
+
+  doX: function(data, data2) {
+    console.log('---- do x ----');
+    return this.done('doX', { man: 'super' });
+  },
+
+  doY: function(data, data2) {
+    console.log('---- do y ----');
+    return this.done('doY');
+  },
+
+  tester: function() {
+    console.log('---- in tester ----');
+  }
+
+});
 
 console.log(a);
-
-// var a = miniFlux.createAction({
-
-//   init: function() {
-//     console.log('Init a');
-//   },
-
-//   doX: function(data, data2) {
-//     console.log('---- do x ----');
-//     return this.done('doX', { man: 'super' });
-//   },
-
-//   doY: function(data, data2) {
-//     console.log('---- do y ----');
-//     return this.done('doY');
-//   }
-
-// });
+console.log(a.tester())
 
 
 
 
-
-
-
-
-
-// var a = new miniFlux.createAction({
-
-//   init: function() {
-//     console.log('Init a');
-//   },
-
-//   doX: function(data, data2) {
-//     console.log('---- do x ----');
-//     return this.done('doX', { man: 'super' });
-//   },
-
-//   doY: function(data, data2) {
-//     console.log('---- do y ----');
-//     return this.done('doY');
-//   }
-
-// });
 
 
 // var s = new miniFlux.createStore({
