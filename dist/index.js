@@ -69,33 +69,9 @@
 	  if (typeof key !== 'string' || typeof Map !== 'object')
 	    throw new Error('key must be a String and map must be an Object.');
 
-	  var len = (type.length + key.length) + 1;
-
-	  this.done = function(topic, data) {
-	    return PubSub.publish(type.concat(key,'.',topic), data);
-	  };
-
-	  this.on = function(topic, fn, context) {
-
-	    // Ability to subscribe to parent or any child.
-	    topic = topic === '*' ? '' : ('.'+topic);
-
-	    var token = PubSub.subscribe(type.concat(key,topic), function(i, d) {
-	      fn.call(context||null, i.substring(len), d);
-	    });
-
-	    return function() {
-	      PubSub.unsubscribe(token);
-	    };
-	  };
-
-	  this.off = function(topic) {
-	    return PubSub.unsubscribe(type.concat(key,'.',topic));
-	  };
-
-	  this.offAll = function() {
-	    return PubSub.unsubscribe(type.concat(key));
-	  };
+	  this.len = (type.length + key.length) + 1;
+	  this.type = type;
+	  this.key = key;
 
 
 	  for (var i in Map) {
@@ -107,8 +83,38 @@
 	  }
 
 	  Map.init && Map.init.call(this);
-	  return this;
 	};
+
+
+	Builder.prototype = {
+
+	  done: function(topic, data) {
+	    return PubSub.publish(this.type.concat(this.key,'.',topic), data);
+	  },
+
+	  on: function(topic, fn, context) {
+
+	    // Ability to subscribe to parent or any child.
+	    topic = topic === '*' ? '' : ('.'+topic);
+
+	    var token = PubSub.subscribe(this.type.concat(this.key,topic), function(i, d) {
+	      fn.call(context||null, i.substring(this.len), d);
+	    });
+
+	    return function() {
+	      PubSub.unsubscribe(token);
+	    };
+	  },
+
+	  off: function(topic) {
+	    return PubSub.unsubscribe(this.type.concat(this.key,'.',topic));
+	  },
+
+	  offAll: function() {
+	    return PubSub.unsubscribe(this.type.concat(this.key));
+	  }
+	};
+
 
 
 	module.exports = {
