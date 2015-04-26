@@ -64,23 +64,29 @@
 	PubSub.immediateExceptions = true;
 
 
-	function Builder(type, key, Map){
+	function Builder(type, key, Map) {
+
+	  if (typeof key !== 'string' || typeof Map !== 'object')
+	    throw new Error('key must be a String and map must be an Object.');
+
+	  var len = (type.length + key.length) + 1;
 
 	  this.done = function(topic, data) {
 	    return PubSub.publish(type.concat(key,'.',topic), data);
 	  };
 
-	  this.on = function(topic, fn) {
+	  this.on = function(topic, fn, context) {
 
 	    // Ability to subscribe to parent or any child.
 	    topic = topic === '*' ? '' : ('.'+topic);
 
-	    var token = PubSub.subscribe(type.concat(key,topic), fn);
-	    return {
-	      off: function() {
-	        PubSub.unsubscribe(token);
-	      }
-	    }
+	    var token = PubSub.subscribe(type.concat(key,topic), function(i, d) {
+	      fn.call(context||null, i.substring(len), d);
+	    });
+
+	    return function() {
+	      PubSub.unsubscribe(token);
+	    };
 	  };
 
 	  this.off = function(topic) {
@@ -100,12 +106,18 @@
 	        i !== 'init') this[i] = Map[i];
 	  }
 
-	  Map.init && Map.init();
+	  Map.init && Map.init.call(this);
 	  return this;
 	};
 
 
 	module.exports = {
+
+	  emit: PubSub.publish,
+
+	  on: PubSub.subscribe,
+
+	  off: PubSub.unsubscribe,
 
 	  offAll: PubSub.clearAllSubscriptions,
 

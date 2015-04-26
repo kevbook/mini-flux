@@ -13,61 +13,50 @@ var a = miniFlux.createAction('a', {
     console.log('Init a');
   },
 
-  doX: function(data, data2) {
+  doX: function(data) {
     console.log('---- do x ----');
     return this.done('doX', { man: 'super' });
   },
 
-  doY: function(data, data2) {
+  doY: function(data) {
     console.log('---- do y ----');
     return this.done('doY');
-  },
-
-  tester: function() {
-    console.log('---- in tester ----');
   }
 
 });
 
-console.log(a);
-console.log(a.tester())
 
+var s = miniFlux.createStore('s', {
 
+  init: function() {
+    console.log('Init s');
 
+    // If stores wants to listen to all completed actions
+    a.on('*', function(key) {
+      console.log('---- in all: %s ----', key);
+    });
+    a.on('doX', this.solveX, this);
+  },
 
+  solveX: function(key, data) {
+    console.log('---- solve x ----', key);
+    this.done('solveX');
+  },
 
+  solveY: function(key, data) {
+    console.log('---- solve y ----');
+  }
 
-// var s = new miniFlux.createStore({
-
-//   init: function() {
-//     console.log('Init s');
-
-//     // If stores wants to listen to all completed actions
-//     // a.on('all', function(key) {
-//     //   console.log('---- in all: %s ----', key);
-//     // });
-
-//     a.on('doX', this.solveX);
-//   },
-
-//   solveX: function(d) {
-//     console.log('---- solve x ----');
-//     return this.done('solveX');
-//   },
-
-//   solveY: function(d) {
-//     console.log('---- solve y ----');
-//   }
-
-// });
+});
 
 // // Listen to stores
-// s.on('solveX', function() {
-//   console.log('---- solve x render ----');
-// });
+s.on('solveX', function() {
+  console.log('---- solve x render ----');
+});
+
 
 // // Do couple of actions
-// a.doX('superman', 'batman');
+a.doX('superman');
 // a.doY('kevin');
 
 

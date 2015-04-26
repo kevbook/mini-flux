@@ -59,61 +59,50 @@
 	    console.log('Init a');
 	  },
 
-	  doX: function(data, data2) {
+	  doX: function(data) {
 	    console.log('---- do x ----');
 	    return this.done('doX', { man: 'super' });
 	  },
 
-	  doY: function(data, data2) {
+	  doY: function(data) {
 	    console.log('---- do y ----');
 	    return this.done('doY');
-	  },
-
-	  tester: function() {
-	    console.log('---- in tester ----');
 	  }
 
 	});
 
-	console.log(a);
-	console.log(a.tester())
 
+	var s = miniFlux.createStore('s', {
 
+	  init: function() {
+	    console.log('Init s');
 
+	    // If stores wants to listen to all completed actions
+	    a.on('*', function(key) {
+	      console.log('---- in all: %s ----', key);
+	    });
+	    a.on('doX', this.solveX, this);
+	  },
 
+	  solveX: function(key, data) {
+	    console.log('---- solve x ----', key);
+	    this.done('solveX');
+	  },
 
+	  solveY: function(key, data) {
+	    console.log('---- solve y ----');
+	  }
 
-	// var s = new miniFlux.createStore({
-
-	//   init: function() {
-	//     console.log('Init s');
-
-	//     // If stores wants to listen to all completed actions
-	//     // a.on('all', function(key) {
-	//     //   console.log('---- in all: %s ----', key);
-	//     // });
-
-	//     a.on('doX', this.solveX);
-	//   },
-
-	//   solveX: function(d) {
-	//     console.log('---- solve x ----');
-	//     return this.done('solveX');
-	//   },
-
-	//   solveY: function(d) {
-	//     console.log('---- solve y ----');
-	//   }
-
-	// });
+	});
 
 	// // Listen to stores
-	// s.on('solveX', function() {
-	//   console.log('---- solve x render ----');
-	// });
+	s.on('solveX', function() {
+	  console.log('---- solve x render ----');
+	});
+
 
 	// // Do couple of actions
-	// a.doX('superman', 'batman');
+	a.doX('superman');
 	// a.doY('kevin');
 
 
@@ -138,23 +127,29 @@
 	PubSub.immediateExceptions = true;
 
 
-	function Builder(type, key, Map){
+	function Builder(type, key, Map) {
+
+	  if (typeof key !== 'string' || typeof Map !== 'object')
+	    throw new Error('key must be a String and map must be an Object.');
+
+	  var len = (type.length + key.length) + 1;
 
 	  this.done = function(topic, data) {
 	    return PubSub.publish(type.concat(key,'.',topic), data);
 	  };
 
-	  this.on = function(topic, fn) {
+	  this.on = function(topic, fn, context) {
 
 	    // Ability to subscribe to parent or any child.
 	    topic = topic === '*' ? '' : ('.'+topic);
 
-	    var token = PubSub.subscribe(type.concat(key,topic), fn);
-	    return {
-	      off: function() {
-	        PubSub.unsubscribe(token);
-	      }
-	    }
+	    var token = PubSub.subscribe(type.concat(key,topic), function(i, d) {
+	      fn.call(context||null, i.substring(len), d);
+	    });
+
+	    return function() {
+	      PubSub.unsubscribe(token);
+	    };
 	  };
 
 	  this.off = function(topic) {
@@ -174,12 +169,18 @@
 	        i !== 'init') this[i] = Map[i];
 	  }
 
-	  Map.init && Map.init();
+	  Map.init && Map.init.call(this);
 	  return this;
 	};
 
 
 	module.exports = {
+
+	  emit: PubSub.publish,
+
+	  on: PubSub.subscribe,
+
+	  off: PubSub.unsubscribe,
 
 	  offAll: PubSub.clearAllSubscriptions,
 
