@@ -69,50 +69,71 @@
 	  if (typeof key !== 'string' || typeof Map !== 'object')
 	    throw new Error('key must be a String and map must be an Object.');
 
+	  var that = this;
 	  this._len = (type.length + key.length) + 1;
 	  this._type = type;
 	  this._key = key;
 
 
-	  for (var i in Map) {
+	  var bypassFn = function(topic) {
+	    return function(data) {
+	      that.done(topic, data);
+	    }
+	  };
 
-	    // Exclude reserved keys
-	    if (typeof Map[i] === 'function' &&
-	        typeof this[i] === 'undefined' &&
-	        i !== 'init') this[i] = Map[i];
-	  }
-
-	  Map.init && Map.init.call(this);
-	};
+	  var setMap = function(i) {
+	    // Check if we need to manually build the bypass Fn
+	    that[i] = (typeof Map[i] === 'object' && Map[i].bypass)
+	      ? bypassFn(Map[i].bypass)
+	      : Map[i];
+	  };
 
 
-	Builder.prototype = {
+	  /**
+	   * Pubsub methods
+	   **/
 
-	  done: function(topic, data) {
-	    return PubSub.publish(this._type.concat(this._key,'.',topic), data);
-	  },
+	  this.done = function(topic, data) {
+	    return PubSub.publish(this._type.concat(that._key,'.',topic), data);
+	  };
 
-	  on: function(topic, fn, context) {
+	  this.on = function(topic, fn, context) {
 
 	    // Ability to subscribe to parent or any child.
 	    topic = topic === '*' ? '' : ('.'+topic);
 
-	    var token = PubSub.subscribe(this._type.concat(this._key,topic), function(i, d) {
-	      fn.call(context||null, i.substring(this._len), d);
+	    var token = PubSub.subscribe(this._type.concat(that._key,topic), function(i, d) {
+	      fn.call(context||that, i.substring(that._len), d);
 	    });
 
 	    return function() {
 	      PubSub.unsubscribe(token);
 	    };
-	  },
+	  };
 
-	  off: function(topic) {
-	    return PubSub.unsubscribe(this._type.concat(this._key,'.',topic));
-	  },
+	  this.off = function(topic) {
+	    return PubSub.unsubscribe(this._type.concat(that._key,'.',topic));
+	  };
 
-	  offAll: function() {
-	    return PubSub.unsubscribe(this._type.concat(this._key));
+	  this.offAll = function() {
+	    return PubSub.unsubscribe(this._type.concat(that._key));
 	  }
+
+
+	  /**
+	   * Build user methods
+	   **/
+
+	  for (var i in Map) {
+
+	    // Exclude reserved keys
+	    if ( (typeof this[i] === 'undefined' && i !== 'init') &&
+	          (typeof Map[i] === 'function' ||
+	            (typeof Map[i] === 'object' && Map[i].bypass) )
+	    ) setMap(i);
+	  }
+
+	  Map.init && Map.init.call(this);
 	};
 
 

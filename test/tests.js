@@ -35,7 +35,7 @@ var s = miniFlux.createStore('s', {
     a.on('*', function(key) {
       console.log('---- in all: %s ----', key);
     });
-    a.on('doX', this.solveX, this);
+    a.on('doX', this.solveX);
   },
 
   solveX: function(key, data) {
