@@ -148,7 +148,7 @@
 	    // Check if we need to manually build the bypass Fn
 	    that[i] = (typeof Map[i] === 'object' && Map[i].bypass)
 	      ? bypassFn(Map[i].bypass)
-	      : Map[i];
+	      : Map[i].bind(that);
 	  };
 
 
@@ -156,7 +156,7 @@
 	   * Pubsub methods
 	   **/
 
-	  this.done = function(topic, data) {
+	  this.dispatch = function(topic, data) {
 	    return PubSub.publish(this._type.concat(that._key,'.',topic), data);
 	  };
 
@@ -166,7 +166,8 @@
 	    topic = topic === '*' ? '' : ('.'+topic);
 
 	    var token = PubSub.subscribe(this._type.concat(that._key,topic), function(i, d) {
-	      fn.call(context||that, i.substring(that._len), d);
+	      // fn.call(context||that, i.substring(that._len), d);
+	      fn(i.substring(that._len), d);
 	    });
 
 	    return function() {
@@ -202,6 +203,8 @@
 
 
 	module.exports = {
+
+	  dispatch: PubSub.publish,
 
 	  emit: PubSub.publish,
 
