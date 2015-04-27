@@ -77,7 +77,7 @@
 
 	  var bypassFn = function(topic) {
 	    return function(data) {
-	      that.done(topic, data);
+	      that.dispatch(topic, data);
 	    }
 	  };
 
@@ -96,6 +96,8 @@
 	  this.dispatch = function(topic, data) {
 	    return PubSub.publish(this._type.concat(that._key,'.',topic), data);
 	  };
+
+	  this.emit = this.dispatch;
 
 	  this.on = function(topic, fn, context) {
 
