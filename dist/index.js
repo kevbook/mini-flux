@@ -60,53 +60,51 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	var PubSub = __webpack_require__(3);
+	var PubSub = __webpack_require__(4),
+	  objectAssign = __webpack_require__(3);
+
 	PubSub.immediateExceptions = true;
 
 
-	function Builder(type, key, Map) {
+	function Builder(key, Map) {
 
 	  if (typeof key !== 'string' || typeof Map !== 'object')
 	    throw new Error('key must be a String and map must be an Object.');
 
 	  var that = this;
-	  this._len = (type.length + key.length) + 1;
-	  this._type = type;
-	  this._key = key;
-
-
-	  var bypassFn = function(topic) {
-	    return function(data) {
-	      that.dispatch(topic, data);
-	    }
-	  };
-
-	  var setMap = function(i) {
-	    // Check if we need to manually build the bypass Fn
-	    that[i] = (typeof Map[i] === 'object' && Map[i].bypass)
-	      ? bypassFn(Map[i].bypass)
-	      : Map[i].bind(that);
-	  };
+	  var store = {};
+	  var len = key.length + 1;
 
 
 	  /**
 	   * Pubsub methods
 	   **/
 
-	  this.dispatch = function(topic, data) {
-	    return PubSub.publish(this._type.concat(that._key,'.',topic), data);
+	   this.store = function(data) {
+
+	    if (typeof data !== 'undefined') {
+
+	      if (typeof data === 'object') objectAssign(store, data);
+	      else if (data === null) store = {};
+	    }
+
+	    return store;
+	   };
+
+
+	  this.publish = function(topic, data) {
+	    return PubSub.publish(key+'.'+topic, data);
 	  };
 
-	  this.emit = this.dispatch;
 
 	  this.on = function(topic, fn, context) {
 
 	    // Ability to subscribe to parent or any child.
-	    topic = topic === '*' ? '' : ('.'+topic);
+	    topic = key + (topic === '*' ? '' : ('.'+topic));
 
-	    var token = PubSub.subscribe(this._type.concat(that._key,topic), function(i, d) {
+	    var token = PubSub.subscribe(topic, function(i, d) {
 	      // fn.call(context||that, i.substring(that._len), d);
-	      fn(i.substring(that._len), d);
+	      fn(i.substring(len), d);
 	    });
 
 	    return function() {
@@ -114,12 +112,14 @@
 	    };
 	  };
 
+
 	  this.off = function(topic) {
-	    return PubSub.unsubscribe(this._type.concat(that._key,'.',topic));
+	    return PubSub.unsubscribe(topic);
 	  };
 
+
 	  this.offAll = function() {
-	    return PubSub.unsubscribe(this._type.concat(that._key));
+	    return PubSub.unsubscribe(key);
 	  }
 
 
@@ -130,10 +130,9 @@
 	  for (var i in Map) {
 
 	    // Exclude reserved keys
-	    if ( (typeof this[i] === 'undefined' && i !== 'init') &&
-	          (typeof Map[i] === 'function' ||
-	            (typeof Map[i] === 'object' && Map[i].bypass) )
-	    ) setMap(i);
+	    if (typeof this[i] === 'undefined' &&
+	        typeof Map[i] === 'function' &&
+	        i !== 'init') that[i] = Map[i].bind(that);
 	  }
 
 	  Map.init && Map.init.call(this);
@@ -143,9 +142,7 @@
 
 	module.exports = {
 
-	  dispatch: PubSub.publish,
-
-	  emit: PubSub.publish,
+	  publish: PubSub.publish,
 
 	  on: PubSub.subscribe,
 
@@ -154,11 +151,7 @@
 	  offAll: PubSub.clearAllSubscriptions,
 
 	  createAction: function(key, Map) {
-	    return new Builder('action:', key, Map);
-	  },
-
-	  createStore: function(key, Map) {
-	    return new Builder('store:', key, Map);
+	    return new Builder(key, Map);
 	  }
 
 	};
@@ -166,6 +159,38 @@
 
 /***/ },
 /* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	function ToObject(val) {
+		if (val == null) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var keys;
+		var to = ToObject(target);
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = arguments[s];
+			keys = Object.keys(Object(from));
+
+			for (var i = 0; i < keys.length; i++) {
+				to[keys[i]] = from[keys[i]];
+			}
+		}
+
+		return to;
+	};
+
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*

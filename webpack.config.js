@@ -14,7 +14,8 @@ exports.config = {
   watch: false,
   entry: {
     index: ['./index'],
-    tests: './test/tests'
+    tests: './test/tests',
+    react_actions: './test/react_actions'
   },
   output: {
     path: 'dist',

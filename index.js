@@ -1,2 +1,2 @@
 
-module.exports = require('./lib/pubsub');
+module.exports = require('./lib/react_actions');
